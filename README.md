@@ -26,7 +26,7 @@ It extends our 2D stack from ICRA 2025 (2nd place, [race highlight](https://www.
 | Prediction | [gp_traj_predictor](./prediction/gp_traj_predictor/README.md) — Gaussian-process opponent trajectory prediction |
 | Global planning | [3d_gb_optimizer](./planner/3d_gb_optimizer/README.md) — 3D track generation, time-optimal racing line, GGV diagrams |
 | Local planning | [fast_sqp_planner](./planner/fast_sqp_planner/README.md), [spliner](./planner/spliner/README.md#static-avoidance-3d_static_avoidance_nodepy) (static obstacle avoidance), [recovery_spliner](./planner/recovery_spliner/README.md), [start_quintic](./planner/spliner/README.md#start-planner-start_quintic_nodepy) (start planner) |
-| State machine | [state_machine](./state_machine/README.md) — global raceline tracking / trailing / overtaking logic; optional FBGA speed profiles for the local waypoints in real time, on the same GGV |
+| State machine | [state_machine](./state_machine/README.md) — global raceline tracking / trailing / overtaking logic |
 | Control | [controller](./controller/README.md) — Advanced Pure Pursuit |
 | Tools | [stack_master](./stack_master/README.md) launch files, rqt plugins ([rqt_gg_viewer](./rqt_gg_viewer/README.md), [rqt_launch_control](./rqt_launch_control/README.md)), sector tuners in [f110_utils](./f110_utils) |
 
