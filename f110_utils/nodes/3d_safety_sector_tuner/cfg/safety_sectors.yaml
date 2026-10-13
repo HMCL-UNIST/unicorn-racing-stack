@@ -1,0 +1,26 @@
+safety_distance_default: 0.2
+n_sectors: 4
+Sector0:
+  start: 0
+  end: 663
+  safety_distance: 0.2
+  pre_m: 0.0
+  post_m: 0.0
+Sector1:
+  start: 664
+  end: 911
+  safety_distance: 0.2
+  pre_m: 0.0
+  post_m: 0.0
+Sector2:
+  start: 912
+  end: 1374
+  safety_distance: 0.2
+  pre_m: 0.0
+  post_m: 0.0
+Sector3:
+  start: 1375
+  end: 1798
+  safety_distance: 0.2
+  pre_m: 0.0
+  post_m: 0.0

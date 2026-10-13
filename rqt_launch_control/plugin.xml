@@ -1,0 +1,18 @@
+<library path="src">
+  <class name="LaunchControlPlugin"
+         type="rqt_launch_control.launch_control_plugin.LaunchControlPlugin"
+         base_class_type="rqt_gui_py::Plugin">
+    <description>
+      Live i_cmd(t) curve preview for the launch_control profile, driven by
+      /vesc/simple_mux dynamic_reconfigure values. Slider changes update the
+      plotted line in-place inside rqt — no PNG round-trip.
+    </description>
+    <qtgui>
+      <group>
+        <label>Visualization</label>
+      </group>
+      <label>Launch Control</label>
+      <icon type="theme">utilities-system-monitor</icon>
+    </qtgui>
+  </class>
+</library>

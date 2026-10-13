@@ -1,0 +1,136 @@
+<!-- 3D base system launch -->
+<!-- Localization: GLIL (real) included below, Gazebo (sim) on remote machine -->
+<!-- Controller + State machine: run separately via 3d_headtohead.launch -->
+<launch>
+  <arg name="map"                  default="gazebo_wall_2"
+    doc="Will search stack_master/maps for a map of the same name." />
+  <arg name="racecar_version"      default="$(env CAR_NAME)"
+    doc="Physical racecar used. Possible values: UNICORNx" />
+  <arg name="sim"                  default="false"
+    doc="True for Gazebo sim on remote machine. Disables hardware + SE." />
+  <arg name="detection"                  default="false"
+    doc="True for enable Detection and Tracking" />
+  <!-- <arg name="fake_odom"            default="false"
+    doc="True to publish fake odom following waypoints (testing without hardware/gazebo)." /> -->
+  <arg name="algo"                 default="slam"
+    doc="Localization source used by the lap analyser (slam = GLIL)." />
+  <arg name="SE"                   default="glil_only"
+    doc="State estimation launch in launch/SE (glil_only)." />
+  <arg name="use_vesc_imu"         default="False"
+    doc="Whether to use built-in VESC IMU or Microstrain" />
+  <arg name="enable_smart_scaling" default="True"
+    doc="Enable smart waypoints velocity scaling" />
+  <arg name="use_local_racing_line" default="false"
+    doc="Enable event-triggered local racing line replanning" />
+  <!-- servo calibration mode (sweeps raw servo positions, records bags, fits poly into vesc.yaml). -->
+  <arg name="calibration" default="false"
+    doc="Enable servo calibration sweep: forces linear map, runs recorder+fitter, updates vesc.yaml." />
+
+  <param name="map"             value="$(arg map)" />
+  <param name="detection"             value="$(arg detection)" />
+  <param name="racecar_version" value="$(arg racecar_version)" />
+  <param name="sim"             value="$(arg sim)" />
+
+  <!-- ================== REAL CAR ================== -->
+  <group unless="$(arg sim)">
+    <!-- Low level + State Estimation + Frenet -->
+    <include file="$(find stack_master)/launch/middle_level.launch">
+      <arg name="racecar_version" value="$(arg racecar_version)" />
+      <arg name="map" value="$(arg map)" />
+      <arg name="SE" value="$(arg SE)" />
+      <arg name="use_vesc_imu" value="$(arg use_vesc_imu)" />
+    </include>
+    <!-- during calibration, force nonlinear mapping OFF so the algebraic trick
+         delta_cmd = (target_servo - offset)/gain produces deterministic raw servo values.
+         Placed AFTER the middle_level include so this <param> is processed after
+         vesc.launch's rosparam load of vesc.yaml (roslaunch: later-in-document wins).
+         Sim path is excluded on purpose: middle_level / vesc are not launched there. -->
+    <param if="$(arg calibration)"
+           name="/vesc/enable_nonlinear_servo_gain" value="false" />
+  </group>
+
+  <!-- ================== SIM (Gazebo on remote) ================== -->
+  <group if="$(arg sim)">
+    <!-- Odom: Gazebo/GLIL base_odom → /car_state/odom, /car_state/pose -->
+    <node pkg="topic_tools" type="relay" name="odom_relay"
+      args="glim_ros/base_odom car_state/odom" />
+    <node name="extract_pose" pkg="stack_master" type="extract_pose_from_odom.py" output="screen">
+      <param name="in_topic" value="car_state/odom" />
+      <param name="out_topic" value="car_state/pose" />
+    </node>
+
+    <!-- Frenet: conversion server + odom republisher (real car gets these from middle_level) -->
+    <node pkg="frenet_conversion_server" name="frenet_conversion_server_node"
+          type="frenet_conversion_server_node" output="screen">
+      <param name="PerceptionOnly" type="bool" value="false"/>
+    </node>
+    <include file="$(find frenet_odom_republisher)/launch/frenet_odom_republisher.launch" />
+  </group>
+
+  <!-- ================== FAKE ODOM (testing only) ================== -->
+  <!-- <group if="$(arg fake_odom)">
+    <node name="fake_odom" pkg="stack_master" type="fake_odom_publisher.py" output="screen">
+      <param name="map" value="$(arg map)" />
+    </node>
+  </group> -->
+
+  <!-- ================== COMMON (real + sim) ================== -->
+  <group if="$(arg detection)">
+    <include file="$(find ra_imm)/launch/detection.launch"/>
+    <arg name="map"                   value="$(arg map)"/>
+  </group>  
+  <!-- Global waypoints publisher (from JSON) -->
+  <node name="global_republisher" pkg="gb_optimizer" type="global_trajectory_publisher.py" output="screen">
+    <param name="map" value="$(arg map)" />
+  </node>
+
+  <!-- ================== SECTOR TUNERS (rqt: dyn_sector_tuner/) ================== -->
+  <!-- speed / overtake / static_obs sector tuners (+ velocity_scaler, ot_interpolator) via include; bridge stays standalone. -->
+  <include file="$(find stack_master)/launch/3d_sector_respawn.launch">
+    <arg name="map"                   value="$(arg map)"/>
+    <arg name="enable_smart_scaling"  value="$(arg enable_smart_scaling)"/>
+    <arg name="use_local_racing_line" value="$(arg use_local_racing_line)"/>
+  </include>
+  <node pkg="bridge_sector_tuner_3d" type="bridge_sector_server.py"
+        name="bridge" ns="dyn_sector_tuner" output="screen"/>
+
+  <!-- Local racing line mux (event-triggered) -->
+  <group if="$(arg use_local_racing_line)">
+    <node pkg="global_line_3d" type="local_raceline_mux_node.py"
+          name="local_raceline_mux" output="screen">
+      <param name="d_threshold" value="0.3" />
+      <param name="v_threshold" value="1.5" />
+      <param name="convergence_d_threshold" value="0.1" />
+      <param name="convergence_v_threshold" value="0.5" />
+      <param name="optimization_horizon" value="10.0" />
+      <param name="N_steps" value="30" />
+      <param name="gg_mode" value="diamond" />
+      <param name="safety_distance" value="0.05" />
+      <param name="smoothed_track_file" value="gazebo_wall_2_3d_smoothed.csv" />
+    </node>
+  </group>
+
+  <!-- State indicator -->
+  <group unless="$(arg sim)">
+    <!-- Real: LED + state display -->
+    <include file="$(find stack_master)/launch/state_indicator.launch"/>
+  </group>
+  <group if="$(arg sim)">
+    <!-- Sim: state display only (no blink1 hardware) -->
+    <node pkg="state_machine" type="state_indicator_node.py" name="state_indicator" output="screen"/>
+  </group>
+
+  <!-- Lap analyser -->
+  <node name="lap_analyser" pkg="lap_analyser" type="lap_analyser.py" output="screen">
+    <param name="loc_algo" value="$(arg algo)" />
+  </node>
+
+  <!-- Servo calibration (recorder + fitter). Runs only when calibration:=true.
+       No effect on normal pipeline when false (default). -->
+  <group if="$(arg calibration)">
+    <include file="$(find stack_master)/launch/servo_calibration.launch">
+      <arg name="racecar_version" value="$(arg racecar_version)" />
+    </include>
+  </group>
+
+</launch>

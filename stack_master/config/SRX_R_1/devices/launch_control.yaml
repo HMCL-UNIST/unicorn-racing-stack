@@ -1,0 +1,9 @@
+launch_profile_mode: 0
+launch_current_A: 75.4
+launch_I_back: 55.0
+launch_I_peak: 75.4
+launch_t_back: 0.05
+launch_t_rise_end: 0.3
+launch_tau: 0.08
+launch_t_total: 1.0
+launch_safety_floor_margin: 0.0

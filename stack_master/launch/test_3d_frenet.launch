@@ -1,0 +1,27 @@
+<!-- minimal test launch for 3D frenet pipeline -->
+<!-- Runs: fake odom + waypoints publisher + frenet odom republisher -->
+<launch>
+  <arg name="map" default="gazebo_wall_3d_rc_car_10th_timeoptimal" />
+  <arg name="speed_scale" default="1.0" />
+
+  <param name="map" value="$(arg map)" />
+  <param name="use_sim_time" value="false" />
+
+  <!-- Fake odom: follows waypoints, publishes /glim_ros/base_odom -->
+  <node name="fake_odom" pkg="stack_master" type="fake_odom_publisher.py" output="screen">
+    <param name="map" value="$(arg map)" />
+    <param name="speed_scale" value="$(arg speed_scale)" />
+  </node>
+
+  <!-- Odom relay: /glim_ros/base_odom → /car_state/odom -->
+  <node pkg="topic_tools" type="relay" name="odom_relay"
+    args="glim_ros/base_odom car_state/odom" />
+
+  <!-- Global waypoints publisher -->
+  <node name="global_republisher" pkg="gb_optimizer" type="global_trajectory_publisher.py" output="screen">
+    <param name="map" value="$(arg map)" />
+  </node>
+
+  <!-- Frenet odom republisher: /odom → /odom_frenet -->
+  <include file="$(find frenet_odom_republisher)/launch/frenet_odom_republisher.launch" />
+</launch>

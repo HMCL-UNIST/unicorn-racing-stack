@@ -1,0 +1,35 @@
+<!-- servo calibration recorder + fitter.
+     Included by 3d_base_system.launch when calibration:=true.
+     Sweeps raw servo positions at constant speed, records per-delta bags, then fits a
+     nonlinear polynomial (servo = f(delta_rad)) and writes coefficients into vesc.yaml. -->
+<launch>
+  <arg name="racecar_version" default="$(env CAR_NAME)"/>
+  <arg name="delta_max"       default="0.6"
+       doc="Max |steering angle| [rad] to sweep. Clipped by servo limits automatically."/>
+  <arg name="delta_step"      default="0.05"
+       doc="Step between sweep points [rad]."/>
+  <arg name="v_const"         default="1.0"
+       doc="Constant forward speed during recording [m/s]. Keep low to minimise tyre slip."/>
+  <arg name="warmup_sec"      default="2.5"
+       doc="Seconds to let speed/steering settle before recording."/>
+  <arg name="record_sec"      default="5.0"
+       doc="Seconds of steady-state recording per sweep point."/>
+  <arg name="poly_degree"     default="5"/>
+
+  <node pkg="stack_master" type="record_steering_bags.py"
+        name="servo_calibration_recorder" output="screen">
+    <param name="racecar_version" value="$(arg racecar_version)"/>
+    <param name="delta_max"       value="$(arg delta_max)"/>
+    <param name="delta_step"      value="$(arg delta_step)"/>
+    <param name="v_const"         value="$(arg v_const)"/>
+    <param name="warmup_sec"      value="$(arg warmup_sec)"/>
+    <param name="record_sec"      value="$(arg record_sec)"/>
+    <param name="poly_degree"     value="$(arg poly_degree)"/>
+    <param name="bag_dir"
+           value="$(find stack_master)/config/$(arg racecar_version)/devices/bag"/>
+    <param name="vesc_yaml"
+           value="$(find stack_master)/config/$(arg racecar_version)/devices/vesc.yaml"/>
+    <param name="fitter_script"
+           value="$(find stack_master)/scripts/fit_steering_poly.py"/>
+  </node>
+</launch>

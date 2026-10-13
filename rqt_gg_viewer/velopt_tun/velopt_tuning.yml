@@ -1,0 +1,19 @@
+base_vehicle: rc_car_10th
+map: kd_0507_v3
+saved_at: '2026-05-09 19:20:45'
+vehicle_name: rc_car_10th_latest
+vo_V_min: 1.0
+vo_bridge: 1.0
+vo_gg_margin: 0.0
+vo_w_T: 30.0
+vo_w_ax_corner_acc: 0.15
+vo_w_ax_corner_k: 0.2
+vo_w_jx: 0.008
+vo_w_jx_acc_ratio: 1.0
+vo_w_jx_brk_ratio: 1.0
+vo_w_jx_curv_alpha_acc: 1.0
+vo_w_jx_curv_alpha_brk: 0.0
+vo_w_jx_curv_beta_acc: 0.0
+vo_w_jx_curv_beta_brk: 0.0
+vo_w_jx_curv_k_alpha: 0.2
+vo_w_jx_curv_k_beta: 0.5

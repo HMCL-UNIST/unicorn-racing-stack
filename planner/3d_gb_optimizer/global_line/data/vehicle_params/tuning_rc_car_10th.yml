@@ -1,0 +1,99 @@
+# Tuning-only parameters (override params_rc_car_10th.yml)
+# Regenerate the GG diagrams after changing values:
+# python gen_gg_diagrams.py --vehicle_name rc_car_10th
+# python gen_diamond_representation.py --vehicle_name rc_car_10th
+---
+# -- GG size (first priority) -------------------------------------
+# lambda_mu_x: longitudinal grip scale -> straight-line accel/decel limit
+#   higher: harder acceleration/braking
+#   lower: more conservative on straights
+lambda_mu_x: 1.0    # range: 0.6 ~ 1.2
+
+# lambda_mu_y: lateral grip scale -> corner speed limit (largest effect on lap time)
+#   higher: faster corners
+#   lower: safer corners
+lambda_mu_y: 1.0    # range: 0.6 ~ 1.2
+
+# -- Power / speed limits -----------------------------------------
+# P_max: maximum motor power [W] -> acceleration cap on fast straights
+#   V < ~10 m/s: grip limits first, P_max does not matter
+#   V > ~10 m/s: acceleration is limited by P_max
+P_max: 300.0        # range: 150 ~ 300
+
+# v_max: absolute top speed [m/s] -> speed ceiling
+v_max: 12.0          # range: 8 ~ 12
+
+# -- GG shape (diagonal) ------------------------------------------
+# p_Dx_2: longitudinal load dependency -> accel/decel while cornering
+#   closer to 0: no combined-grip loss (optimistic)
+#   more negative: less accel/decel while cornering (conservative)
+p_Dx_2: 0.0        # range: -1.0 ~ 1.0 (physically sensible: <= 0)
+
+# p_Dy_2: lateral load dependency (same effect as above, lateral)
+p_Dy_2: 0.0       # range: -1.0 ~ 1.0 (physically sensible: <= 0)
+
+# -- Vehicle behavior ----------------------------------------------
+# epsilon: front/rear roll stiffness distribution
+#   0.5: neutral (front/rear equal, maximum ay_max)
+#   < 0.5: oversteer tendency
+#   > 0.5: understeer tendency
+epsilon: 0.5         # range: 0.3 ~ 0.7
+
+# -- Additional NLP constraints (decel/accel limits) ---------------
+# P_brake_max: maximum braking power [W] -> high-speed deceleration limit
+#   null: unlimited
+#   value: adds the constraint F_brake * V <= P_brake_max when braking
+#   low speed is grip-limited and unchanged; the higher the speed, the lower the decel limit
+P_brake_max: 350.0   # range: 100 ~ 400 (null = unlimited)
+
+# ax_max_cap: absolute cap on acceleration [m/s²]
+#   null: unlimited (set by tires + power only)
+#   value: enforces ax <= ax_max_cap at every speed
+ax_max_cap: null     # range: 3.0 ~ 10.0 (null = unlimited)
+
+# ax_min_cap: absolute cap on deceleration [m/s²] (enter a positive value)
+#   null: unlimited
+#   value: enforces ax >= -ax_min_cap at every speed
+ax_min_cap: null     # range: 3.0 ~ 10.0 (null = unlimited)
+
+# ay_max_cap: absolute cap on lateral acceleration [m/s²]
+#   null: unlimited
+#   value: directly limits the cornering speed (V_corner = sqrt(ay_max_cap * R))
+ay_max_cap: null     # range: 3.0 ~ 10.0 (null = unlimited)
+
+# Diamond post-processing parameters
+# - ax_max_scale / ax_min_scale scale acceleration and braking separately,
+#   gg_exp_scale scales the NLP-fitted exponent (the NLP result is kept as the base)
+# - defaults: all null (not applied, NLP result as is)
+# Implemented in: gen_diamond_representation.py (post-processing step)
+##
+# -- Diamond post-processing: shape (combined-slip region) ---------
+# gg_exp_scale: NLP-fitted exponent x scale, clipped to [1.0, 2.0]
+#   null = NLP as is (default, recommended)
+#   0.85 = mild diamond shaping (~1.6% lap time loss, for a first test on the car)
+#   0.75 = medium (~3% lap time loss, suggested starting point if the car slides a lot)
+#   0.65 = aggressive (~5% lap time loss)
+# Effect: uses less combined slip at corner entry/exit, so the planner naturally
+#       separates the accel/brake timing.
+#       The NLP's per-V/g variation is scaled proportionally, so the natural
+#       differences due to gravity/speed are kept.
+gg_exp_scale: null
+
+# -- Diamond post-processing: separate accel/decel scales ---------
+# ax_max_scale: diamond ax_max (acceleration) x scale
+#   null = NLP as is (default)
+#   < 1.0 = less acceleration -> later corner-exit acceleration
+#   > 1.0 = more aggressive acceleration (beyond the NLP limit, careful)
+ax_max_scale: null       # range: 0.5 ~ 1.2
+
+# ax_min_scale: diamond ax_min (deceleration) x scale
+#   null = NLP as is (default)
+#   < 1.0 = less deceleration -> earlier corner-entry braking
+#   > 1.0 = more aggressive deceleration (careful)
+ax_min_scale: null       # range: 0.5 ~ 1.2
+
+# ay_scale: diamond ay_max (lateral acceleration) x scale
+#   null = NLP as is (default)
+#   < 1.0 = lower corner speed (conservative)
+#   > 1.0 = higher corner speed (aggressive)
+ay_scale: null           # range: 0.5 ~ 1.2

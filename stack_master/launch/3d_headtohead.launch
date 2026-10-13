@@ -1,0 +1,87 @@
+<!-- 3D headtohead — controller + state machine + planners -->
+<launch>
+  <arg name="racecar_version" default="$(env CAR_NAME)" />
+  <arg name="ctrl_algo" default="PP" />
+  <arg name="LU_table" default="SRX1-0427" />
+  <arg name="MAP_mode" default="safe" />
+  <arg name="enable_planners" default="True" />
+  <arg name="enable_prediction" default="True" />
+  <arg name="dynamic_avoidance_mode" default="SQP" />
+  <arg name="use_vd_prediction" default="False" />
+
+  <param name="measure" value="False" />
+
+  <!-- ================== CONTROLLER ================== -->
+  <rosparam ns="L1_controller" command="load"
+    file="$(find stack_master)/config/$(arg racecar_version)/controller.yaml" />
+  <node pkg="controller" name="dyn_controller" type="l1_params_server.py" output="screen" />
+  <node pkg="controller" name="controller_manager" type="controller_manager.py" output="screen">
+    <param name="LU_table" value="$(arg LU_table)" />
+    <param name="ctrl_algo" value="$(arg ctrl_algo)" />
+  </node>
+
+  <!-- ================== STATE MACHINE (3D: 2.5D vel planner) ================== -->
+  <node pkg="state_machine" type="dynamic_statemachine_server.py" name="dyn_statemachine" output="screen" />
+  <node pkg="state_machine" type="3d_state_machine_node.py" name="state_machine">
+    <rosparam file="$(find stack_master)/config/state_machine_params.yaml" />
+  </node>
+
+  <!-- ================== STATE MACHINE PLANNER PARAMS ================== -->
+  <group ns="dyn_planners_statemachine">
+    <include file="$(find stack_master)/launch/planners.launch"><arg name="planners" value="global_tracking" /></include>
+    <include file="$(find stack_master)/launch/planners.launch"><arg name="planners" value="recovery_planner" /></include>
+    <include file="$(find stack_master)/launch/planners.launch"><arg name="planners" value="start_planner" /></include>
+    <include file="$(find stack_master)/launch/planners.launch"><arg name="planners" value="static_avoidance_planner" /></include>
+    <include file="$(find stack_master)/launch/planners.launch"><arg name="planners" value="dynamic_avoidance_planner" /></include>
+  </group>
+
+  <!-- ================== 3D PLANNERS (enable_planners:=True) ================== -->
+  <group if="$(arg enable_planners)">
+
+    <!-- Planner tuning servers (rqt: dyn_planner_tuner/) -->
+    <group ns="dyn_planner_tuner">
+      <node pkg="recovery_spliner" type="dynamic_recovery_spline_server.py" name="recovery" output="screen" />
+      <node pkg="spliner" type="dynamic_spline_server.py" name="static_avoidance" output="screen" />
+    </group>
+
+    <!-- Recovery (3D) -->
+    <node pkg="recovery_spliner" type="3d_recovery_spliner_node.py" name="recovery_planner_spline"
+          output="screen" />
+
+    <!-- Start planner -->
+
+    <!-- new start path generator — Frenet quintic + optional POINTS mode (BPoly).
+         Publishes /planner/start_wpnts (OTWpntArray) when rqt toggle
+         publish_to_state_machine=True so state_machine's start_wpnts_cb picks it up. -->
+    <node pkg="spliner" type="start_quintic_node.py" name="start_planner_v3" output="screen"/>
+
+    <!-- Static Avoidance (3D) — feeds /planner/avoidance/static_otwpnts (SMART_STATIC state) -->
+    <node pkg="spliner" type="3d_static_avoidance_node.py" name="planner_spline" output="screen">
+      <remap from="/planner/avoidance/otwpnts" to="/planner/avoidance/static_otwpnts"/>
+    </node>
+
+  </group>
+
+  <!-- ================== DYNAMIC AVOIDANCE (3D SQP, enable_planners:=True) ================== -->
+  <!-- SQP owns /planner/avoidance/otwpnts. -->
+  <group if="$(arg enable_planners)">
+    <group if="$(eval dynamic_avoidance_mode == 'SQP')">
+      <node pkg="sqp_planner" type="dynamic_sqp_server.py" name="dynamic_sqp_tuner_node" output="screen"/>
+      <node pkg="sqp_planner" type="3d_sqp_avoidance_node.py" name="planner_sqp" output="screen"/>
+      <node pkg="sqp_planner" type="update_waypoints.py" name="waypoint_updater" output="screen"/>
+    </group>
+  </group>
+
+  <!-- ================== GP PREDICTION (3D, enable_prediction:=True) ================== -->
+  <group if="$(arg enable_prediction)">
+    <node pkg="gp_traj_predictor" type="dynamic_prediction_server.py" name="dynamic_prediction_tuner_node" output="screen"/>
+    <node pkg="gp_traj_predictor" type="3d_opp_prediction.py" name="opponent_propagation_predictor" output="screen">
+      <param name="use_vd_prediction" value="$(arg use_vd_prediction)" />
+      <param name="obstacle_half_width" value="0.3" />
+    </node>
+    <node pkg="gp_traj_predictor" type="3d_opponent_trajectory.py" name="OpponentHalflap" output="screen"/>
+    <node pkg="gp_traj_predictor" type="gaussian_process_opp_traj.py" name="GP_trajectory" output="screen" launch-prefix="taskset -c 1"/>
+    <node pkg="gp_traj_predictor" type="predictor_opponent_trajectory.py" name="Predictor_Opp" output="screen"/>
+  </group>
+
+</launch>

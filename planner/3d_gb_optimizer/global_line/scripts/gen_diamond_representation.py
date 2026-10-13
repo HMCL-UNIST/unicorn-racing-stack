@@ -1,0 +1,1 @@
+../../gg_diagram_generation/gen_diamond_representation.py

@@ -1,0 +1,14 @@
+<!-- -*- mode: XML -*- -->
+<!-- VESC current control isolation test.
+     Brings up vesc_driver ONLY (no simple_mux, no custom_ackermann_to_vesc, no joy).
+     Use to verify direct /vesc/commands/motor/current publish reaches the motor
+     before wiring jerk==511 launch torque path through the full ackermann pipeline. -->
+<launch>
+  <arg name="racecar_version" default="$(env CAR_NAME)" doc="Physical racecar (UNICORNx)" />
+  <arg name="vesc_config" default="$(find stack_master)/config/$(arg racecar_version)/devices/vesc.yaml" />
+
+  <group ns="vesc">
+    <rosparam file="$(arg vesc_config)" command="load" />
+    <node pkg="vesc_driver" type="vesc_driver_node" name="vesc_driver" output="screen" required="true"/>
+  </group>
+</launch>

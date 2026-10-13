@@ -1,0 +1,39 @@
+<!-- -*- mode: XML -*- -->
+<!-- 3D mapping launch — assumes 3D track CSV already exists in maps/{map}/ -->
+<!-- Usage:
+     Phase 1 (optimization only, CSV already exists):
+       roslaunch stack_master 3d_mapping.launch map:=experiment_3d_2 create_map:=false
+     Phase 2 (future: create CSV from PCD + optimize):
+       roslaunch stack_master 3d_mapping.launch map:=experiment_3d_2 create_map:=true
+-->
+<launch>
+    <arg name="racecar_version" default="$(env CAR_NAME)" doc="Physical racecar used. Possible values: UNICORNx" />
+
+    <arg name="map" doc="Map name (must have 3D track CSV in maps/{map}/)" />
+    <arg name="gb_conf_path" default="$(find stack_master)/config/$(arg racecar_version)/global_planner_params.yaml" />
+    <arg name="reverse" default="False" doc="Set True if you want reverse direction of raceline" />
+    <arg name="create_map" default="False" doc="Set false if 3D CSV already exists (default for 3D)" />
+    <arg name="create_global_path" default="True" doc="Set false if you want to save map only" />
+    <arg name="show_plots" default="False" doc="Set true if you want see the result with images" />
+
+    <param name="racecar_version" value="$(arg racecar_version)" />
+
+    <!-- launch 3D global planner (gb_optimizer_25d) -->
+    <node pkg="gb_optimizer_25d" type="3d_global_planner_node.py" name="global_planner_3d" output="screen">
+        <rosparam file="$(arg gb_conf_path)" />
+        <param name="create_map" value="$(arg create_map)" />
+        <param name="create_global_path" value="$(arg create_global_path)"/>
+        <param name="map" value="$(arg map)" />
+        <param name="map_dir" value="$(find stack_master)/maps/$(arg map)/" />
+        <param name="reverse_mapping" value="$(arg reverse)" />
+        <param name="show_plots" value="$(arg show_plots)" />
+    </node>
+
+    <!-- 3D sector slicing (uses 3D sector_tuner packages) -->
+    <!-- <group if="$(arg create_global_path)">
+        <include file="$(find stack_master)/launch/3d_sector_slicing.launch">
+            <arg name="map" value="$(arg map)" />
+        </include>
+    </group> -->
+
+</launch>

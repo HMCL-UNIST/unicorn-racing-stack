@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- dyn cfg server only — spawned by the gg_tuner Safety group's
+         `safety_sector_setting` persistent toggle. Reads
+         <map>/safety_sectors.yaml on startup, surfaces N per-sector sliders
+         under /dyn_sector_tuner/safety, mirrors slider state to
+         /safety_sector_params/... rosparam tree. The slicing GUI lives in
+         safety_tuner.launch (separate trigger) so the two can be toggled
+         independently. -->
+    <arg name="map" default="$(optenv MAP_NAME gazebo_wall_2)" />
+
+    <param name="/map" value="$(arg map)" />
+
+    <group ns="dyn_sector_tuner">
+        <node pkg="safety_sector_tuner_3d"
+              type="safety_sector_server.py"
+              name="safety"
+              output="screen">
+            <param name="map" value="$(arg map)" />
+        </node>
+    </group>
+</launch>

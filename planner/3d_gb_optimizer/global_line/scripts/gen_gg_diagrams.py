@@ -1,0 +1,1 @@
+../../gg_diagram_generation/gen_gg_diagrams.py

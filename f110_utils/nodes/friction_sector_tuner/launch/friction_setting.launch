@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- friction dyn cfg server only — standalone trigger.
+         Same pattern as 3d_safety_sector_tuner/launch/safety_setting.launch.
+         Reads <map>/friction_scaling.yaml on startup, surfaces N
+         per-sector sliders via dynamic_reconfigure, mirrors slider
+         state to /friction_map_params/... rosparam tree and publishes
+         /friction_map, /friction_sector_markers. The slicing GUI lives
+         in friction_tuner.launch (separate trigger) so the two can be
+         toggled independently. -->
+    <arg name="map" default="$(optenv MAP_NAME gazebo_wall_2)" />
+
+    <param name="/map" value="$(arg map)" />
+
+    <node pkg="friction_sector_tuner"
+          type="friction_sector_server.py"
+          name="friction"
+          output="screen">
+        <param name="map" value="$(arg map)" />
+    </node>
+</launch>

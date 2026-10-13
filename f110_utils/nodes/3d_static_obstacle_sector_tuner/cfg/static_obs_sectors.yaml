@@ -1,0 +1,22 @@
+n_sectors: 3
+Static_Obs_sector0:
+  start: 0
+  end: 162
+  s_start: 0.0
+  s_end: 16.194698142587782
+  name: sector_1
+  static_obs_section: false
+Static_Obs_sector1:
+  start: 163
+  end: 357
+  s_start: 16.294665415072892
+  s_end: 35.688316277184185
+  name: sector_2
+  static_obs_section: false
+Static_Obs_sector2:
+  start: 358
+  end: 636
+  s_start: 35.788283549669295
+  s_end: 63.579185300529815
+  name: sector_3
+  static_obs_section: false

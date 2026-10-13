@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!-- 5 sector consumer nodes. base_system include + gg_tuner apply_new_sectors. -->
+<launch>
+  <arg name="map"/>
+  <arg name="enable_smart_scaling"  default="false"/>
+  <arg name="use_local_racing_line" default="false"/>
+
+  <rosparam ns="map_params"            command="load"
+    file="$(find stack_master)/maps/$(arg map)/speed_scaling.yaml"/>
+  <rosparam ns="ot_map_params"         command="load"
+    file="$(find stack_master)/maps/$(arg map)/ot_sectors.yaml"/>
+  <rosparam ns="static_obs_map_params" command="load"
+    file="$(find stack_master)/maps/$(arg map)/static_obs_sectors.yaml"/>
+
+  <group ns="dyn_sector_tuner">
+    <node pkg="sector_tuner_3d"
+          type="sector_server.py"            name="speed"      output="screen"/>
+    <node pkg="overtaking_sector_tuner_3d"
+          type="ot_sector_server.py"         name="overtake"   output="screen"/>
+    <node pkg="static_obstacle_sector_tuner_3d"
+          type="static_obs_sector_server.py" name="static_obs" output="screen"/>
+  </group>
+
+  <node pkg="sector_tuner_3d" type="vel_scaler_node.py"
+        name="velocity_scaler" output="screen">
+    <param name="enable_smart_scaling" value="$(arg enable_smart_scaling)"/>
+    <remap if="$(arg use_local_racing_line)"
+           from="/global_waypoints_scaled" to="/global_waypoints_scaled_raw"/>
+  </node>
+
+  <node pkg="overtaking_sector_tuner_3d" type="ot_interpolator.py"
+        name="ot_interpolator" output="screen"/>
+</launch>

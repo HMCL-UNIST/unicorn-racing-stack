@@ -1,0 +1,22 @@
+global_friction: 1.0
+n_sectors: 5
+Sector0:
+  start: 0
+  end: 210
+  friction: 1.0
+Sector1:
+  start: 211
+  end: 439
+  friction: 1.0
+Sector2:
+  start: 440
+  end: 634
+  friction: 1.0
+Sector3:
+  start: 635
+  end: 757
+  friction: 1.0
+Sector4:
+  start: 758
+  end: 842
+  friction: 1.0

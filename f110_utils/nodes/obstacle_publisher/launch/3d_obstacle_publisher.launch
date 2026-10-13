@@ -1,0 +1,92 @@
+<launch>
+    <!-- 3D version of obstacle_publisher.launch
+              - launches 3d_obstacle_publisher.py (z_m / 3D Frenet srv aware)
+              - identical args/topics to keep downstream compatibility -->
+    <arg name="trajectory" default="min_curv"/> <!-- centerline/min_curv/shortest_path/min_time -->
+    <arg name="start_s" default="0"/>
+    <arg name="speed_scaler" default="0.5"/>
+    <arg name="constant_speed" default="false"/>
+
+    <!-- d-oscillation (mechanism ported from obstacle_publisher_grid.py).
+              Default: smooth spatial overshoot (one smooth bend per lap).
+              reactive:=true → temporal zigzag (similar to the grid node, f≈0.6Hz).
+              Override the detailed parameters (osc_mode/n/f/amp/phase0) when needed. -->
+    <arg name="reactive" default="false"/> <!-- true: short-period temporal oscillation -->
+    <arg name="d_oscillate" default="true"/> <!-- oscillation on/off (default on = overshoot line) -->
+    <arg name="osc_mode" default="$(eval 'temporal' if reactive else 'spatial')"/>
+    <arg name="osc_n_waves_per_lap" default="1.5"/> <!-- spatial mode: waves per lap -->
+    <arg name="osc_frequency" default="$(eval 0.6 if reactive else 0.1)"/> <!-- temporal mode: Hz -->
+    <arg name="osc_amplitude" default="0.25"/> <!-- m, amplitude along d -->
+    <arg name="osc_phase0" default="0.0"/> <!-- rad, initial phase (to spread multiple obstacles) -->
+
+    <!-- tracker-mimic parameters
+            Detect gate: only gate-in when obstacle is within [s_back..s_fwd] of ego
+            Coast: freeze posterior for this duration after leaving gate
+                   (matches ttl_dynamic=40 / rate_tracking=40Hz = 1.0s)
+            Noise: cartesian xyz Gaussian (re-derived to s,d via glob2frenet)
+            KF:    linear, state [s, d, vs, vd], const-velocity model -->
+    <arg name="detect_s_back"  default="-5.0"/>
+    <arg name="detect_s_fwd"   default="10.0"/>
+    <arg name="detect_d_max"   default="10.0"/>   <!-- effectively off on single-layer tracks -->
+    <arg name="coast_duration" default="1.0"/>    <!-- s -->
+    <arg name="noise_enable"   default="true"/>
+    <arg name="noise_sigma_xy" default="0.05"/>   <!-- m -->
+    <arg name="noise_sigma_z"  default="0.02"/>   <!-- m -->
+    <arg name="kf_enable"      default="true"/>
+    <arg name="kf_q_s"         default="0.0001"/>
+    <arg name="kf_q_d"         default="0.0001"/>
+    <arg name="kf_q_vs"        default="0.5"/>
+    <arg name="kf_q_vd"        default="0.5"/>
+
+    <!-- gazebo static obstacle publisher (absorbed from a separate launch).
+              enable_gazebo_static_obs=true → 3d_obstacle_publisher also reads
+              /gazebo/static_obstacles/{poses,radii} and appends them to the
+              single /tracking/obstacles stream (no dual-publisher race).
+              Safe no-op when those topics are absent (e.g. non-gazebo runs). -->
+    <arg name="enable_gazebo_static_obs" default="true"/>
+    <arg name="gz_in_poses_topic"   default="/gazebo/static_obstacles/poses"/>
+    <arg name="gz_in_radii_topic"   default="/gazebo/static_obstacles/radii"/>
+    <arg name="gz_out_markers_topic" default="/gazebo_static_obstacle_markers"/>
+    <arg name="gz_id_offset"        default="100"/>
+    <!-- s-gate for static obstacles on planner-facing /tracking/obstacles.
+         Truth channel ignores this gate (collision detector sees everything). -->
+    <arg name="gz_static_s_back"    default="-2.0"/>
+    <arg name="gz_static_s_fwd"     default="15.0"/>
+
+    <!-- Launch Collision detector (unchanged, 2D/3D agnostic) -->
+    <node name="collision_detector" pkg="obstacle_publisher" type="collision_detector.py" output="screen"/>
+
+    <node name="obstacle_publisher" pkg="obstacle_publisher" type="3d_obstacle_publisher.py"
+          output="screen">
+        <param name="start_s" value="$(arg start_s)"/>
+        <param name="trajectory" value="$(arg trajectory)"/>
+        <param name="speed_scaler" value="$(arg speed_scaler)"/>
+        <param name="constant_speed" value="$(arg constant_speed)"/>
+        <param name="d_oscillate" value="$(arg d_oscillate)"/>
+        <param name="osc_mode" value="$(arg osc_mode)"/>
+        <param name="osc_n_waves_per_lap" value="$(arg osc_n_waves_per_lap)"/>
+        <param name="osc_frequency" value="$(arg osc_frequency)"/>
+        <param name="osc_amplitude" value="$(arg osc_amplitude)"/>
+        <param name="osc_phase0" value="$(arg osc_phase0)"/>
+        <param name="detect_s_back"  value="$(arg detect_s_back)"/>
+        <param name="detect_s_fwd"   value="$(arg detect_s_fwd)"/>
+        <param name="detect_d_max"   value="$(arg detect_d_max)"/>
+        <param name="coast_duration" value="$(arg coast_duration)"/>
+        <param name="noise_enable"   value="$(arg noise_enable)"/>
+        <param name="noise_sigma_xy" value="$(arg noise_sigma_xy)"/>
+        <param name="noise_sigma_z"  value="$(arg noise_sigma_z)"/>
+        <param name="kf_enable"      value="$(arg kf_enable)"/>
+        <param name="kf_q_s"  value="$(arg kf_q_s)"/>
+        <param name="kf_q_d"  value="$(arg kf_q_d)"/>
+        <param name="kf_q_vs" value="$(arg kf_q_vs)"/>
+        <param name="kf_q_vd" value="$(arg kf_q_vd)"/>
+        <!-- gazebo static obstacles -->
+        <param name="enable_gazebo_static_obs" value="$(arg enable_gazebo_static_obs)"/>
+        <param name="gz_in_poses_topic"   value="$(arg gz_in_poses_topic)"/>
+        <param name="gz_in_radii_topic"   value="$(arg gz_in_radii_topic)"/>
+        <param name="gz_out_markers_topic" value="$(arg gz_out_markers_topic)"/>
+        <param name="gz_id_offset"        value="$(arg gz_id_offset)"/>
+        <param name="gz_static_s_back"    value="$(arg gz_static_s_back)"/>
+        <param name="gz_static_s_fwd"     value="$(arg gz_static_s_fwd)"/>
+    </node>
+</launch>

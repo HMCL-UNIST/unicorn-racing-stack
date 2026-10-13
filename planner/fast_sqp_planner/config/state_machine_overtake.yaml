@@ -1,0 +1,14 @@
+# fast_sqp_planner SM params (overtaking mode)
+# loaded alongside state_machine_params.yaml when state_machine_type:=overtaking
+
+close_threshold_tight: 0.2
+close_threshold_loose: 0.2
+close_speed_ratio_thres: 0.5
+ot_collision_ttc_s: 0.5
+ot_engage_ttc_s: 1.0
+ot_engage_min_m: 5.0
+overtaking_ttl_sec: 0.5
+opponent_dist_threshold: 0.8
+# trailing trigger — lateral margin + s-gap based
+ot_margin_safe_m: 0.15
+ot_blocking_s_gap_m: 0.5

@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!-- Rolling-horizon SQP overtake planner.
+     attach_to_statemachine:=false (default) -> observation topic only. -->
+<launch>
+  <arg name="state"                  default="overtake"
+       doc="overtake only (recovery/observe not yet supported by SQP)"/>
+  <arg name="instance_name"          default="fast_sqp_planner"/>
+  <arg name="config_file"            default="$(find fast_sqp_planner)/config/state_$(arg state).yaml"/>
+  <arg name="attach_to_statemachine" default="false"
+       doc="false -> /planner/avoidance/otwpnts_observation; true -> real topic."/>
+  <arg name="output_topic"           default=""
+       doc="Non-empty overrides role remap entirely."/>
+
+  <!-- optional real C++ FBGA (velocity_mode='3d') -->
+  <arg name="fbga_enable"     default="false"/>
+  <arg name="fbga_bin"        default=""/>
+  <arg name="fbga_gg_bin"     default=""/>
+  <arg name="fbga_params_yml" default=""/>
+  <arg name="bridge_effect"   default="1.0"/>
+
+  <node pkg="fast_sqp_planner" type="fast_sqp_planner_node.py"
+        name="$(arg instance_name)" output="screen">
+    <rosparam command="load" file="$(arg config_file)"/>
+    <!-- FBGA params -->
+    <param name="fbga_enable"     value="$(arg fbga_enable)"/>
+    <param name="fbga_bin"        value="$(arg fbga_bin)"/>
+    <param name="fbga_gg_bin"     value="$(arg fbga_gg_bin)"/>
+    <param name="fbga_params_yml" value="$(arg fbga_params_yml)"/>
+    <param name="bridge_effect"   value="$(arg bridge_effect)"/>
+
+    <!-- Priority: explicit output_topic > attach_to_statemachine > observation. -->
+    <remap from="/planner/fast_sqp_planner/otwpnts" to="$(arg output_topic)"
+           if="$(eval arg('output_topic') != '')"/>
+    <remap from="/planner/fast_sqp_planner/otwpnts" to="/planner/avoidance/otwpnts"
+           if="$(eval arg('output_topic') == '' and arg('attach_to_statemachine'))"/>
+    <remap from="/planner/fast_sqp_planner/otwpnts" to="/planner/avoidance/otwpnts_observation"
+           if="$(eval arg('output_topic') == '' and not arg('attach_to_statemachine'))"/>
+  </node>
+</launch>

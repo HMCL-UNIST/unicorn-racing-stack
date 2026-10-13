@@ -1,0 +1,30 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+  <!-- launches the state estimation nodes using GLIL -->
+  <!-- PARAMS -->
+  <arg name="racecar_version" default="$(env CAR_NAME)" doc="Physical racecar used. Possible values: UNICORNx" />
+  <arg name="map" default="hangar" />
+  <arg name="use_vesc_imu" default="False" doc="whether use built-in vesc imu or microstrain" />
+
+  <!-- LAUNCH GLIL Localization -->
+  <include file="$(find glim_ros)/launch/glil_cpu.launch">
+    <arg name="rviz" value="false"/>
+    <arg name="map" value="$(arg map)" />
+  </include>
+
+  <!-- remap odom topic with relay -->
+  <node pkg="topic_tools" type="relay" name="odom_relay"
+    args="glim_ros/base_odom car_state/odom" />
+
+  <!-- start Car State Node -->
+  <node name="extract_pose" pkg="stack_master" type="extract_pose_from_odom.py" output="screen">
+      <param name="in_topic" value="car_state/odom" />
+      <param name="out_topic" value="car_state/pose" />
+  </node>
+
+  <!-- Launch map server with regular map name (Not Needed for 3D Localization)--> 
+  <!-- <node pkg="map_server" name="map_server" type="map_server"
+    args="$(find stack_master)/maps/$(arg map)/$(arg map).yaml">
+  </node> -->
+
+</launch>

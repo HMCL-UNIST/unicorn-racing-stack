@@ -1,0 +1,49 @@
+ros_env_setup="/opt/ros/$ROS_DISTRO/setup.bash"
+echo "sourcing   $ros_env_setup"
+source "$ros_env_setup"
+source "/home/$USER/catkin_ws/devel/setup.bash"
+alias sauce='source /opt/ros/noetic/setup.bash && source /home/${USER}/catkin_ws/devel/setup.bash'
+alias scripz='cd /home/${USER}/catkin_ws/src/race_stack/stack_master/scripts'
+alias switch_map='/home/${USER}/catkin_ws/src/race_stack/stack_master/scripts/switch_map.sh $1'
+alias record='/home/${USER}/catkin_ws/src/race_stack/stack_master/scripts/bag.sh'
+alias sb='source ~/.bashrc'
+
+echo "ROS_ROOT   $ROS_ROOT"
+echo "ROS_DISTRO $ROS_DISTRO"
+
+# check if ros hostname is empty
+# if [ -z "$ROS_HOSTNAME" ]; then
+#     echo "ROS_HOSTNAME is empty, setting it to default"
+#     export ROS_HOSTNAME=localhost
+# fi
+
+# automatically get zerotier IP. Be careful! it does not work if do not have an ip assigned with the correct prefix, "192.168." in this case, and it might not work if you have multiple ips with the same prefix
+# export ROS_HOSTNAME=$( ifconfig | awk '/inet 192.168./ {print $2}' )
+
+# export ROS_HOSTNAME=localhost
+# export ROS_IP=localhost
+
+# export ROS_HOSTNAME='192.168.70.*'
+# export ROS_IP='192.168.70.*'
+# export CAR_NAME="SRX_R_1"
+
+
+export ROS_MASTER_URI="http://${ROS_HOSTNAME}:11311"
+
+# permanently switch settings in ~/.bashrc
+# usage: set_car HOBAO
+set_car() {
+  sed -i "s/^export CAR_NAME=.*/export CAR_NAME=\"$1\"/" ~/.bashrc
+  export CAR_NAME="$1"
+  echo "CAR_NAME permanently set to $1"
+}
+# usage: set_ip 192.168.70.*
+set_ip() {
+  sed -i "s/^export ROS_HOSTNAME=.*/export ROS_HOSTNAME='$1'/" ~/.bashrc
+  sed -i "s/^export ROS_IP=.*/export ROS_IP='$1'/" ~/.bashrc
+  sed -i "s|^export ROS_MASTER_URI=.*|export ROS_MASTER_URI=\"http://$1:11311\"|" ~/.bashrc
+  export ROS_HOSTNAME="$1"
+  export ROS_IP="$1"
+  export ROS_MASTER_URI="http://$1:11311"
+  echo "ROS_HOSTNAME/IP/MASTER_URI permanently set to $1"
+}

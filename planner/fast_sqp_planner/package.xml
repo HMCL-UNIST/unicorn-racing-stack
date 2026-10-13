@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>fast_sqp_planner</name>
+  <version>0.0.1</version>
+  <description>Rolling-horizon SQP overtake planner (CasADi+IPOPT). Parallel companion to sqp_planner.</description>
+
+  <maintainer email="unicornracing2020@gmail.com">UNICORN Racing</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>visualization_msgs</build_depend>
+  <build_depend>f110_msgs</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>dynamic_reconfigure</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>f110_msgs</exec_depend>
+  <exec_depend>frenet_conversion</exec_depend>
+  <exec_depend>vel_planner</exec_depend>
+  <!-- real C++ FBGA wrapper for velocity_mode='3d' -->
+  <exec_depend>fbga_runner</exec_depend>
+
+  <export/>
+</package>

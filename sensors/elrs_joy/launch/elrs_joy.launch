@@ -1,0 +1,66 @@
+<launch>
+    <node name="elrs_joy_node" pkg="elrs_joy" type="elrs_joy_node.py" output="screen">
+        <!-- Serial port settings -->
+        <param name="port" value="/dev/ELRS"/>
+        <param name="baud_rate" value="115200"/>
+        <!-- <param name="baud_rate" value="416666"/> -->
+
+
+        <!-- Publish rate (Hz) -->
+        <param name="publish_rate" value="100"/>
+
+        <!-- Xbox-compatible Joy message: 8 axes, 11 buttons -->
+        <param name="num_axes" value="8"/>
+        <param name="num_buttons" value="11"/>
+
+        <!-- Axis mapping: joy_index -> CRSF channel -->
+        <!-- axes[1]=Throttle(CH1), axes[3]=Steering(CH3) -->
+        <rosparam param="axes_joy_indices">[1, 3]</rosparam>
+        <rosparam param="axes_crsf_channels">[2, 0]</rosparam>
+        <!-- Axis sign: [throttle, steering], -1.0 to invert -->
+        <rosparam param="axes_invert">[1.0, -1.0]</rosparam>
+        <!-- per-axis CRSF calibration (measured on this transmitter).
+             Index order matches axes_crsf_channels: [throttle(CH2), steering(CH0)].
+             throttle: 174 / 1007 / 1811   (full range, mid offset from 992)
+             steering: 174 /  992 / 1773   (positive end short of 1811)
+             Asymmetric normalize ensures ±1.0 hits both mechanical stops. -->
+        <rosparam param="axes_cal_min">[174, 174]</rosparam>
+        <rosparam param="axes_cal_mid">[1007, 992]</rosparam>
+        <rosparam param="axes_cal_max">[1811, 1773]</rosparam>
+
+        <!-- Button mapping: joy_index -> CRSF channel -->
+        <!-- buttons[4]=LB(CH6), buttons[5]=RB(CH7) -->
+        <!-- add buttons[0]=A <- CRSF ch7 (identified by diagnostic toggle test) -->
+        <rosparam param="button_joy_indices">[0, 4, 5]</rosparam>
+        <rosparam param="button_crsf_channels">[7, 5, 6]</rosparam>
+        <!-- invert polarity for A (CH7 idles low, latched switch presses high) -->
+        <rosparam param="button_invert">[1, 0, 0]</rosparam>
+
+        <!-- Button threshold (CRSF value, below=pressed) -->
+        <param name="button_threshold" value="992"/>
+
+        <!-- Deadzone for axes (0.0 ~ 1.0) -->
+        <param name="deadzone" value="0.05"/>
+
+        <!-- Failsafe timeout (seconds) -->
+        <param name="failsafe_timeout" value="0.5"/>
+
+        <!-- LB (humandrive takeover) safety guard.
+             LB is a 3-position switch with healthy values ≈191 / ≈992 / ≈1792.
+             pos1 (low) = pressed (humandrive ON). pos2 (mid) and pos3 (high)
+             both count as released. Anything between bands is treated as
+             noise: LB state is held, and 0->1 (entry) requires N consecutive
+             trusted "pressed" samples. 1->0 (release) commits immediately. -->
+        <param name="lb_pressed_max"     value="350"/>
+        <param name="lb_idle_min"        value="700"/>
+        <param name="lb_idle_max"        value="1300"/>
+        <param name="lb_released_min"    value="1600"/>
+        <param name="lb_debounce_frames" value="5"/>
+
+        <!-- A button (buttons[0]) needs 5 consecutive "pressed" samples
+             before flipping 0->1. Release (1->0) is immediate. -->
+        <param name="a_debounce_frames"  value="5"/>
+
+        <param name="frame_id" value="elrs_joy"/>
+    </node>
+</launch>

@@ -1,0 +1,10 @@
+a_x_max: 5.0
+a_y_max: 4.5
+ax_max_brake: 7.0
+ax_max_motor: 5.0
+dyn_model_exp: 1.0
+grip_scale_exp: 0.7
+slope_correction: 1.0
+slope_brake_margin: 0.0
+slope_brake_vmax: 5.0
+v_max: 12.0

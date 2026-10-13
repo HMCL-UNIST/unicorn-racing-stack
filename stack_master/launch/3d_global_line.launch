@@ -1,0 +1,42 @@
+<launch>
+  <!-- == Arguments =========================================================== -->
+  <arg name="map"              default="gazebo_wall_2" />
+  <arg name="vehicle"          default="rc_car_10th" />
+  <arg name="gg_mode"          default="diamond" />
+  <arg name="safety_distance"  default="0.25" />
+  <arg name="bin_size"         default="0.05" />
+  <arg name="smooth_step"      default="0.05" />
+  <arg name="opt_step"         default="0.2" />
+  <arg name="output"           default="global_waypoints" />
+  <arg name="raw_csv"          default="auto" />
+  <arg name="gen3d_csv"        default="auto" />
+  <arg name="smoothed_csv"     default="auto" />
+  <arg name="raceline_csv"     default="auto" />
+  <arg name="run_gg"           default="false" />
+  <!-- forward start_from to run_pipeline.sh so gg_tuner can skip steps 1~4 -->
+  <arg name="start_from"       default="1" />
+  <!-- bridge mu scale baked into raceline -->
+  <arg name="g_weight"         default="1.0" />
+  <!-- bridge centerline / heading-lock.
+       Yaml at maps/<map>/bridge_sectors.yaml stores positions only
+       (start/end). Tuning knobs come from rqt (Bridge group) and are
+       forwarded here as args. Missing yaml ⇒ silent no-op. -->
+  <arg name="bridge_constraints_enable" default="true" />
+  <arg name="bridge_pre_m"              default="0.0" />
+  <arg name="bridge_post_m"             default="0.0" />
+  <arg name="bridge_force_center"       default="false" />
+  <arg name="bridge_chi_max_rad"        default="-1.0" />
+
+  <!-- == Step 0: GG diagram generation (optional, one-time per vehicle) ==== -->
+  <node if="$(arg run_gg)"
+        pkg="global_line_3d" type="gen_gg_diagrams.py" name="gen_gg_diagrams"
+        output="screen"
+        cwd="$(find global_line_3d)/gg_diagram_generation"
+        args="--vehicle_name $(arg vehicle)" />
+
+  <!-- == Step 1~6: Full pipeline ============================================= -->
+  <node unless="$(arg run_gg)"
+        pkg="global_line_3d" type="run_pipeline.sh" name="run_pipeline"
+        output="screen"
+        args="--map-dir $(find stack_master)/maps/$(arg map) --track $(arg map) --vehicle $(arg vehicle) --gg-mode $(arg gg_mode) --safety-distance $(arg safety_distance) --bin-size $(arg bin_size) --smooth-step $(arg smooth_step) --opt-step $(arg opt_step) --output $(arg output) --raw-csv $(arg raw_csv) --gen3d-csv $(arg gen3d_csv) --smoothed-csv $(arg smoothed_csv) --raceline-csv $(arg raceline_csv) --start-from $(arg start_from) --g-weight $(arg g_weight) --bridge-constraints-enable $(arg bridge_constraints_enable) --bridge-pre-m $(arg bridge_pre_m) --bridge-post-m $(arg bridge_post_m) --bridge-force-center $(arg bridge_force_center) --bridge-chi-max-rad $(arg bridge_chi_max_rad)" />
+</launch>

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- standalone bridge sector tuner.
+         Operates on stack_master/maps/<map>/<map>_3d_smoothed.csv and writes
+         to stack_master/maps/<map>/bridge_sectors.yaml. -->
+    <arg name="map" default="gazebo_wall_2" />
+    <arg name="map_dir" default="$(find stack_master)/maps/$(arg map)" />
+    <arg name="smoothed_csv" default="$(arg map_dir)/$(arg map)_3d_smoothed.csv" />
+
+    <node pkg="bridge_sector_tuner_3d"
+          type="bridge_slicing.py"
+          name="bridge_sector_node_3d"
+          output="screen">
+        <param name="map"           value="$(arg map)" />
+        <param name="map_dir"       value="$(arg map_dir)" />
+        <param name="smoothed_csv"  value="$(arg smoothed_csv)" />
+    </node>
+</launch>

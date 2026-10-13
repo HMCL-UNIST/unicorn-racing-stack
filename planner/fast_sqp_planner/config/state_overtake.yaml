@@ -1,0 +1,56 @@
+# fast_sqp_planner state:=overtake config (online rolling mode)
+
+rate_hz: 40.0
+racecar_version: SRX2
+
+# online rolling horizon
+rolling_mode: true
+T_horizon: 2.0
+s_min_horizon: 9.0
+
+# Shape / RoC
+lookahead: 10.0
+width_car: 0.30
+evasion_dist: 0.35
+spline_bound_mindist: 0.35
+avoidance_resolution: 30
+back_to_raceline_after: 5.0
+obs_traj_tresh: 1.5
+prediction_horizon_s: 0.5    # how many seconds of GP prediction to use as obstacle
+
+regularization:
+  lambda_reg: 500.0
+  homotopy_lock: false
+
+weights:
+  lambda_smooth: 100000.0
+  lambda_start_heading: 3000.0
+  lambda_apex_bias: 0.0
+  lambda_side: 8.0       # SQP chooses optimal side (inside curve preferred)
+  lambda_jerk: 50000.0
+  lambda_term: 0.0
+  lambda_obs: 1000.0     # lowered to let smooth/jerk dominate (reduces zigzag)
+  lambda_kappa: 5000.0
+  lambda_gg: 5000.0
+  lambda_near_reg: 10000.0
+  lambda_obs_smooth: 15000.0  # suppress lateral rate near obstacle
+  lambda_progress: 1.0
+
+near_knots_K: 15
+obs_ramp_knots: 5
+
+optimize_velocity: false
+velocity_mode: 3d    # 2_5d | 3d | nlp
+
+abort:
+  performance_margin_s: 1.00
+  consecutive_cycles: 5
+  cooldown_s: 0.0
+  safety_sigma_multiplier: 1.5
+
+freeze_distance_m: 0.0
+freeze_blend_m: 0.0
+
+fallback:
+  hold_last_valid: true
+  max_fail_hold_cycles: 3

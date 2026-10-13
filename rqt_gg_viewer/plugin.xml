@@ -1,0 +1,16 @@
+<library path="src">
+  <class name="GGViewerPlugin" type="rqt_gg_viewer.gg_viewer_plugin.GGViewerPlugin"
+         base_class_type="rqt_gui_py::Plugin">
+    <description>
+      GGV Diamond Viewer — real-time visualization of GGV computation results
+      with baseline diff and slope analysis.
+    </description>
+    <qtgui>
+      <group>
+        <label>Visualization</label>
+      </group>
+      <label>GG Viewer</label>
+      <icon type="theme">utilities-system-monitor</icon>
+    </qtgui>
+  </class>
+</library>

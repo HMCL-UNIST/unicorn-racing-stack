@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- slicing GUI only — spawned by the gg_tuner Safety group's
+         `safety_sector_tuner` trigger (auto-clear, bridge pattern). User
+         marks sector boundaries on the smoothed centerline CSV, "Done"
+         dumps <map>/safety_sectors.yaml + <pkg>/cfg/safety_sectors.yaml,
+         finish_sector.sh rebuilds the dyn cfg.
+
+         The dyn cfg server lives in a separate launch (safety_setting.launch)
+         so the slicing GUI and the live rqt sliders can be toggled
+         independently. -->
+    <arg name="map"          default="gazebo_wall_2" />
+    <arg name="map_dir"      default="$(find stack_master)/maps/$(arg map)" />
+    <arg name="smoothed_csv" default="$(arg map_dir)/$(arg map)_3d_smoothed.csv" />
+
+    <node pkg="safety_sector_tuner_3d"
+          type="safety_sector_slicing.py"
+          name="safety_sector_node_3d"
+          output="screen">
+        <param name="map"          value="$(arg map)" />
+        <param name="map_dir"      value="$(arg map_dir)" />
+        <param name="smoothed_csv" value="$(arg smoothed_csv)" />
+    </node>
+</launch>

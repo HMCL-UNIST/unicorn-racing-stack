@@ -1,0 +1,1 @@
+../../gg_diagram_generation/calc_max_slip_map.py

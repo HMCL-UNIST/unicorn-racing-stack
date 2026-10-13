@@ -1,0 +1,23 @@
+# ROS
+build/
+devel/
+install/
+.catkin_workspace
+*.pyc
+__pycache__/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+launch_logs/
+
+# Backup
+*_backup_*/
+*.bag

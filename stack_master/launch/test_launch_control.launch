@@ -1,0 +1,64 @@
+<!-- -*- mode: XML -*- -->
+<!-- One-shot bench test for launch torque control.
+     Brings up: vesc_driver + custom_ackermann_to_vesc + simple_mux (with launch logic)
+                + joy + elrs_joy + test_control_publisher (manual ackermann source).
+     SKIPS: IMU, LiDAR, camera, microstrain (not needed for launch bench tests).
+
+     Usage flow (wheels off ground):
+       1. roslaunch stack_master test_launch_control.launch
+       2. rqt -> Dynamic Reconfigure
+            /vesc/simple_mux        : launch_current_A, launch_t_total
+            /test_control_publisher : cmd_speed_mps (post-launch target)
+       3. A button on joypad  -> arm launch (toggle)
+       4. RB                  -> autodrive on; if armed, fires launch (0.75s constant current)
+       5. test_control_publisher terminal shows real motor current + measured speed every tick
+       6. LB                  -> instant abort -->
+<launch>
+  <arg name="racecar_version" default="$(env CAR_NAME)" doc="Physical racecar (UNICORNx)" />
+
+  <!-- ===== VESC stack (driver + ackermann_to_vesc + simple_mux) ===== -->
+  <!-- per-car launch profile yaml. Auto-resolved from $(env CAR_NAME).
+       Drop file at: stack_master/config/<CAR>/devices/launch_control.yaml
+       The yaml is written by simple_mux's save_params (rqt_reconfigure) —
+       round-trip "tune in rqt → save_params → that yaml IS the next launch's seed". -->
+  <arg name="launch_profile"
+       default="$(find stack_master)/config/$(arg racecar_version)/devices/launch_control.yaml"
+       doc="YAML preset loaded into /vesc/simple_mux at startup (per-car, picked from CAR_NAME)"/>
+  <group ns="vesc">
+    <include file="$(find stack_master)/launch/vesc.launch">
+      <arg name="racecar_version" value="$(arg racecar_version)" />
+    </include>
+    <node pkg="stack_master" type="simple_mux.py" name="simple_mux" output="screen">
+      <rosparam command="load" file="$(arg launch_profile)"/>
+    </node>
+  </group>
+
+  <!-- ===== Joy inputs (USB + ELRS) ===== -->
+  <node pkg="joy" type="joy_node" name="joy_node" output="screen"/>
+  <!-- use ELRS receiver instead of USB joystick.
+       Two ELRS adapter variants are supported — pick exactly ONE (dual
+       publisher on /joy will race). Both expose identical Joy layout, so
+       simple_mux / state_machine / controller see no API change.
+
+         (A) CP2102 USB-TTL @ /dev/ELRS, 115200 baud, NO CRC (range-check
+             validation only). Legacy adapter — known to leak garbage frames
+             through to /joy under vibration / loose connector, which is the
+             original "RB phantom -> autodrive_latched" mechanism. Keep for
+             fallback if FT232 hardware is unavailable.
+
+         (B) FT232RL USB-TTL @ /dev/ELRS_FT232, 420000 baud, CRC-8 (poly 0xD5)
+             ENABLED. Native CRSF baud + real protocol checksum kill 99.6% of
+             garbage frames before they reach /joy. Adds two latency-zero RB
+             safety predicates (PRE-stability + cross-channel jerk) so single
+             garbage frames that slip past CRC can't toggle autodrive_latched.
+             Debug stats on /elrs_joy_node/debug_stats (1Hz JSON).
+
+       To switch: comment out the active line and uncomment the other. The
+       udev rule (.devcontainer/.install_utils/udev_rules_elrs.sh) already
+       maps both chips to their respective symlinks. -->
+  <!-- <include file="$(find elrs_joy)/launch/elrs_joy.launch"/> -->
+  <include file="$(find elrs_joy)/launch/elrs_joy_ft232.launch"/>
+
+  <!-- ===== Manual ackermann source (replaces autonomy stack) ===== -->
+  <node pkg="stack_master" type="test_control_publisher.py" name="test_control_publisher" output="screen" required="true"/>
+</launch>

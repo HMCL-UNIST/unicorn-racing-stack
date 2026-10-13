@@ -1,0 +1,160 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+  <arg name="racecar_version" default="$(env CAR_NAME)"  doc="Physical racecar used. Possible values: UNICORNx" />
+
+  <!-- LIDAR (Hokuyo - deprecated) -->
+  <!-- <arg name="lidar_config" default="$(find stack_master)/config/$(arg racecar_version)/devices/lidar.yaml" />
+  <node pkg="urg_node" type="urg_node" name="laser_node">
+    <rosparam file="$(arg lidar_config)" command="load" />
+  </node> -->
+
+  <!-- LIDAR (Livox MID-360) -->
+  <arg name="lvx_file_path" default="livox_test.lvx"/>
+  <arg name="bd_list" default="100000000000000"/>
+  <arg name="xfer_format" default="0"/>
+  <arg name="multi_topic" default="0"/>
+  <arg name="data_src" default="0"/>
+  <arg name="publish_freq" default="10.0"/>
+  <arg name="output_type" default="0"/>
+  <arg name="rosbag_enable" default="false"/>
+  <arg name="cmdline_arg" default="$(arg bd_list)"/>
+  <arg name="msg_frame_id" default="livox_frame"/>
+  <arg name="lidar_bag" default="true"/>
+  <arg name="imu_bag" default="true"/>
+
+  <param name="xfer_format" value="$(arg xfer_format)"/>
+  <param name="multi_topic" value="$(arg multi_topic)"/>
+  <param name="data_src" value="$(arg data_src)"/>
+  <param name="publish_freq" type="double" value="$(arg publish_freq)"/>
+  <param name="output_data_type" value="$(arg output_type)"/>
+  <param name="cmdline_str" type="string" value="$(arg bd_list)"/>
+  <param name="cmdline_file_path" type="string" value="$(arg lvx_file_path)"/>
+  <param name="user_config_path" type="string" value="$(find livox_ros_driver2)/config/MID360_config.json"/>
+  <param name="frame_id" type="string" value="$(arg msg_frame_id)"/>
+  <param name="enable_lidar_bag" type="bool" value="true"/>
+  <param name="enable_imu_bag" type="bool" value="true"/>
+
+  <node name="livox_lidar_publisher2" pkg="livox_ros_driver2"
+        type="livox_ros_driver2_node" required="true"
+        output="log" args="$(arg cmdline_arg)"/>
+
+  <!-- RoboSense LiDAR (rslidar_sdk) -->
+  <include file="$(find rslidar_sdk)/launch/start.launch"/>
+
+  <group if="$(arg rosbag_enable)">
+    <node pkg="rosbag" type="record" name="record" output="screen" args="-a"/>
+  </group>
+
+   <!-- <include file="$(find realsense2_camera)/launch/rs_l515.launch">
+    <arg name="filters"            value="pointcloud"/>
+    
+    <arg name="pointcloud_texture_stream" value="RS2_STREAM_ANY"/> 
+    
+    <arg name="enable_sync"        value="false"/>
+    <arg name="align_depth"        value="false"/>
+    
+ 
+    <arg name="depth_width"        value="640"/>
+    <arg name="depth_height"       value="480"/>
+
+    <arg name="depth_fps"          value="30"/> 
+    <arg name="enable_color"       value="false"/>
+    <arg name="allow_no_texture_points" value="true"/> 
+ 
+    <arg name="color_width"        value="640"/>
+    <arg name="color_height"       value="480"/>    
+    <arg name="color_fps"          value="30"/>
+    <arg name="publish_tf"                value="false"/>
+    <arg name="tf_publish_rate"           default="0"/>
+    <arg name="enable_confidence"  value="false"/>
+    <arg name="enable_infra"       value="false"/>
+    <arg name="enable_gyro"        value="false"/>
+    <arg name="enable_accel"       value="false"/>
+    <arg name="initial_reset"      value="true"/>
+    <arg name="clip_distance"             default="-2"/>
+    <arg name="min_clip_distance"         default="-1"/>
+  </include>
+  <param name="/camera/l500_depth_sensor/laser_power" value="100"/>
+  <param name="/camera/l500_depth_sensor/confidence_threshold" value="2"/>
+  <param name="/camera/l500_depth_sensor/receiver_gain" value="18"/>
+  <param name="/camera/l500_depth_sensor/noise_filtering" value="6"/>
+  <param name="/camera/l500_depth_sensor/post_processing_sharpening" value="3"/>
+  <param name="/camera/l500_depth_sensor/digital_gain" value="2"/>  -->
+
+  <!-- <node name="extrinsic_tf" pkg="l515_mid360_calib" type="static_tf_pub.py" output="log">
+    <param name="config" value="$(find l515_mid360_calib)/config/extrinsic.yaml"/>
+  </node> -->
+  <!-- <node name="merge_node" pkg="l515_mid360_calib" type="merge_node" output="screen">
+    <param name="target_frame"       value="imu"/>
+    <param name="livox_topic"        value="/glim_ros/points_corrected"/>
+    <param name="cam_topic"          value="/camera/depth/color/points"/>
+    <param name="odom_topic"         value="/glim_ros/imu_odom"/>
+    <param name="pose_topic"         value="/glim_ros/pose_corrected"/>
+    <param name="out_topic"          value="/merged/points"/>
+    <param name="cam_voxel"          value="0.01"/>
+    <param name="cam_range_min"      value="0.1"/>
+    <param name="cam_range_max"      value="9.0"/>
+    <param name="cam_buf_secs"       value="0.5"/>
+    <param name="sync_slop"          value="0.05"/>
+    <param name="enable_drift_comp"  value="true"/>
+    <param name="enable_motion_comp" value="false"/>
+    <param name="sync_mode"          value="interp"/>
+    <param name="sync_mode"          value="nearest"/>
+    <param name="drift_alpha"        value="0.1"/>
+    <param name="manual_offset"      value="0.0"/>
+  </node> -->
+
+
+  <!-- IMU -->
+  <arg name="imu_config" default="$(find stack_master)/config/$(arg racecar_version)/devices/imu.yaml" />
+  <node name="microstrain_inertial_driver" pkg="microstrain_inertial_driver" type="microstrain_inertial_driver_node" output="screen">
+    <rosparam file="$(arg imu_config)" command="load" />
+  </node>
+
+  <!-- VESC -->
+  <group ns="vesc">
+    <include file="$(find stack_master)/launch/vesc.launch">
+      <arg name="racecar_version" value="$(arg racecar_version)" />
+    </include>
+
+    <!-- load per-car launch_control.yaml (4-phase exp current profile params).
+         Guarded: if CAR_NAME env is empty (e.g. bench/sim without car identity), skip
+         load so simple_mux falls back to cfg defaults instead of crashing on missing yaml. -->
+    <node pkg="stack_master" type="simple_mux.py" name="simple_mux" output="screen">
+      <rosparam command="load"
+                file="$(find stack_master)/config/$(env CAR_NAME)/devices/launch_control.yaml"
+                unless="$(eval optenv('CAR_NAME','') == '')"/>
+    </node>
+  </group>
+
+  <include file="$(find stack_master)/config/$(arg racecar_version)/devices/static_transforms.launch.xml"/>
+
+  <node pkg="stack_master" type="relay_node.py" name="relay_node" output="screen"/>
+
+  <node pkg="joy" type="joy_node" name="joy_node" output="screen"/>
+  <!-- use ELRS receiver instead of USB joystick.
+       Two ELRS adapter variants are supported — pick exactly ONE (dual
+       publisher on /joy will race). Both expose identical Joy layout, so
+       simple_mux / state_machine / controller see no API change.
+
+         (A) CP2102 USB-TTL @ /dev/ELRS, 115200 baud, NO CRC (range-check
+             validation only). Legacy adapter — known to leak garbage frames
+             through to /joy under vibration / loose connector, which is the
+             original "RB phantom -> autodrive_latched" mechanism. Keep for
+             fallback if FT232 hardware is unavailable.
+
+         (B) FT232RL USB-TTL @ /dev/ELRS_FT232, 420000 baud, CRC-8 (poly 0xD5)
+             ENABLED. Native CRSF baud + real protocol checksum kill 99.6% of
+             garbage frames before they reach /joy. Adds two latency-zero RB
+             safety predicates (PRE-stability + cross-channel jerk) so single
+             garbage frames that slip past CRC can't toggle autodrive_latched.
+             Debug stats on /elrs_joy_node/debug_stats (1Hz JSON).
+
+       To switch: comment out the active line and uncomment the other. The
+       udev rule (.devcontainer/.install_utils/udev_rules_elrs.sh) already
+       maps both chips to their respective symlinks. -->
+  <!-- <include file="$(find elrs_joy)/launch/elrs_joy.launch"/> -->
+  <include file="$(find elrs_joy)/launch/elrs_joy_ft232.launch"/>
+
+
+</launch>

@@ -1,0 +1,30 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+  <arg name="racecar_version" default="$(env CAR_NAME)"  doc="Physical racecar used. Possible values: UNICORNx" />
+
+  <!-- VESC -->
+  <group ns="vesc">
+    <include file="$(find stack_master)/launch/vesc.launch">
+      <arg name="racecar_version" value="$(arg racecar_version)" />
+    </include>
+
+    <!-- load per-car launch_control.yaml (4-phase exp current profile params).
+         Guarded: if CAR_NAME env is empty (e.g. bench/sim without car identity), skip
+         load so simple_mux falls back to cfg defaults instead of crashing on missing yaml. -->
+    <node pkg="stack_master" type="simple_mux.py" name="simple_mux" output="screen">
+      <rosparam command="load"
+                file="$(find stack_master)/config/$(env CAR_NAME)/devices/launch_control.yaml"
+                unless="$(eval optenv('CAR_NAME','') == '')"/>
+    </node>
+  </group>
+
+  <include file="$(find stack_master)/config/$(arg racecar_version)/devices/static_transforms.launch.xml"/>
+
+  <node pkg="stack_master" type="relay_node.py" name="relay_node" output="screen"/>
+
+  <node pkg="joy" type="joy_node" name="joy_node" output="screen"/>
+  <!-- use ELRS receiver instead of USB joystick -->
+  <!-- <include file="$(find elrs_joy)/launch/elrs_joy.launch"/> -->
+  <include file="$(find elrs_joy)/launch/elrs_joy_ft232.launch"/>
+
+</launch>

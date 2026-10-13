@@ -1,0 +1,14 @@
+path_mode: 0
+target_delta_s_m: 10.0
+bound_margin_m: 0.15
+ay_max_mps2: 4.0
+assume_speed_mps: 3.0
+n_samples: 80
+min_delta_s_m: 1.0
+zero_start_slope: false
+use_straight_prefix: true
+straight_prefix_m: 2.0
+spline_scale: 0.8
+points_tail_n: 40
+points_use_straight_prefix: false
+points_straight_prefix_m: 1.0

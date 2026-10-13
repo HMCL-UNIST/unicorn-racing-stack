@@ -1,0 +1,42 @@
+# fast_sqp_planner config
+
+rate_hz: 60.0
+racecar_version: SRX2
+
+# Shape / RoC
+lookahead: 15.0
+width_car: 0.30
+evasion_dist: 0.25
+spline_bound_mindist: 0.25
+avoidance_resolution: 20
+back_to_raceline_after: 5.0
+obs_traj_tresh: 1.5
+prediction_horizon_s: 1.0    # how many seconds of GP prediction to use as obstacle
+
+regularization:
+  lambda_reg: 10.0            # warm-start anchor (high = stable, low = reactive)
+  homotopy_lock: false        # allow side switch
+
+weights:
+  lambda_smooth: 100000.0     # path smoothness
+  lambda_start_heading: 1500.0
+  lambda_apex_bias: 0.0
+  lambda_side: 50.0
+  lambda_jerk: 50000.0        # curvature rate (suppress spikes)
+  lambda_term: 5000.0          # pull last knot toward raceline (d→0)
+  lambda_obs: 10000.0         # soft obstacle clearance
+  lambda_kappa: 5000.0        # soft curvature limit
+  lambda_gg: 5000.0           # soft GG diagram (opt_vel only)
+  lambda_near_reg: 500.0      # near-term warm-start anchor
+
+near_knots_K: 8
+
+abort:
+  performance_margin_s: 1.00
+  consecutive_cycles: 3
+  cooldown_s: 2.0
+  safety_sigma_multiplier: 3.0
+
+fallback:
+  hold_last_valid: true
+  max_fail_hold_cycles: 5

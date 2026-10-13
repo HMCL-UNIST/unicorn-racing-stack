@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>fbga_runner</name>
+  <version>0.0.0</version>
+  <description>
+    Python wrapper around libs/FBGA C++ binary (GIGI_test_unicorn.exe).
+    Reusable helper for any ROS node that solves real-FBGA velocity profiles.
+  </description>
+  <maintainer email="unicornracing2020@gmail.com">UNICORN Racing</maintainer>
+  <license>Apache License 2.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+    <build_type>catkin</build_type>
+  </export>
+</package>

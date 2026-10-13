@@ -1,0 +1,31 @@
+<!-- -*- mode: XML -*- -->
+<!-- Sector slicing GUIs of the 3D sector tuner packages (speed, overtaking, static obstacle) -->
+<launch>
+    <arg name="map"/>
+        <!-- Launch 3D Sector Slicer/Tuner from Utils -->
+        <node pkg="sector_tuner_3d" type="sector_slicing.py" name="sector_node_3d" output="screen">
+            <param name="save_dir" value="$(find stack_master)/maps/$(arg map)" />
+        </node>
+
+        <!-- Launch 3D Overtaking Sector Slicer/Tuner from Utils -->
+        <node pkg="overtaking_sector_tuner_3d" type="ot_sector_slicing.py" name="ot_sector_node_3d" output="screen">
+            <param name="save_dir" value="$(find stack_master)/maps/$(arg map)" />
+        </node>
+
+        <!-- Launch 3D Static Obstacle Sector Slicer/Tuner from Utils -->
+        <node pkg="static_obstacle_sector_tuner_3d" type="static_obs_sector_slicing.py" name="static_obs_sector_node_3d" output="screen">
+            <param name="save_dir" value="$(find stack_master)/maps/$(arg map)" />
+        </node>
+
+        <!-- friction slicing split out to friction_tuner.launch (standalone). -->
+        <!--
+        <node pkg="friction_sector_tuner" type="friction_sector_slicing.py" name="friction_sector_node" output="screen">
+            <param name="save_dir" value="$(find stack_master)/maps/$(arg map)" />
+        </node>
+        -->
+
+        <!-- safety_sector_slicing.py is spawned standalone via the
+             gg_tuner Safety group's run_safety_dis_tuner trigger (bridge
+             pattern). Intentionally NOT included here so the common
+             run_sector_slicing trigger only spawns the four legacy slicers. -->
+</launch>

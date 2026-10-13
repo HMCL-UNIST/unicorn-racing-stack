@@ -1,0 +1,40 @@
+<launch>
+    <!-- Grid-based dynamic obstacle publisher -->
+    <!-- This version modifies occupancy grid in real-time, allowing LiDAR-based detection -->
+    <!-- Obstacles are only detected when visible to sensors (realistic FOV simulation) -->
+
+    <!-- Features:
+         - Rectangular obstacle (65cm x 35cm) following GB heading
+         - Switches between GB and Fixed paths based on /smart_static_active
+         - GB trajectory: /global_waypoints
+         - Fixed trajectory: /smart_static_avoidance_wpnts
+         - Visualization: Red (GB mode), Blue (Fixed mode)
+    -->
+
+    <arg name="start_s_gb" default="0"/> <!-- Starting s in GB Frenet coordinates -->
+    <arg name="start_s_fixed" default="0"/> <!-- Starting s in Fixed Frenet coordinates -->
+    <arg name="speed_scaler" default="0.4"/>
+    <arg name="constant_speed" default="false"/>
+    <arg name="obstacle_length_m" default="0.5"/> <!-- Length in heading direction (65cm) -->
+    <arg name="obstacle_width_m" default="0.3"/> <!-- Width in normal direction (35cm) -->
+    <arg name="update_rate" default="20"/> <!-- Hz - how often to update the map -->
+    <arg name="enable_smart" default="false"/> <!-- Enable Smart Static trajectory mode -->
+    <arg name="reactive" default="false"/> <!-- Enable reactive mode: sine-wave d perturbation with varying amplitude -->
+    <arg name="d_left" default="0.5"/> <!-- Left boundary for reactive mode (positive d) -->
+    <arg name="d_right" default="-0.5"/> <!-- Right boundary for reactive mode (negative d) -->
+
+    <node name="obstacle_publisher_grid" pkg="obstacle_publisher" type="obstacle_publisher_grid.py"
+          output="screen">
+        <param name="start_s_gb" value="$(arg start_s_gb)"/>
+        <param name="start_s_fixed" value="$(arg start_s_fixed)"/>
+        <param name="speed_scaler" value="$(arg speed_scaler)"/>
+        <param name="constant_speed" value="$(arg constant_speed)"/>
+        <param name="obstacle_length_m" value="$(arg obstacle_length_m)"/>
+        <param name="obstacle_width_m" value="$(arg obstacle_width_m)"/>
+        <param name="update_rate" value="$(arg update_rate)"/>
+        <param name="enable_smart" value="$(arg enable_smart)"/>
+        <param name="reactive" value="$(arg reactive)"/>
+        <param name="d_left" value="$(arg d_left)"/>
+        <param name="d_right" value="$(arg d_right)"/>
+    </node>
+</launch>

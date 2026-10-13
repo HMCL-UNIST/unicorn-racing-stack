@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!-- Takeover launch: remap overrides SQP while running, auto-fallback on stop. -->
+<launch>
+  <!-- optional real C++ FBGA (velocity_mode='3d') -->
+  <arg name="fbga_enable"     default="false"/>
+  <arg name="fbga_bin"        default=""
+       doc="abs path to libs/FBGA/bin/GIGI_test_unicorn.exe (empty = node default)"/>
+  <arg name="fbga_gg_bin"     default=""
+       doc="abs path to gg.bin (empty = rc_car_10th_latest default)"/>
+  <arg name="fbga_params_yml" default=""
+       doc="abs path to params_&lt;vehicle&gt;.yml (empty = rc_car_10th_latest default)"/>
+  <arg name="bridge_effect"   default="1.0"/>
+
+  <node pkg="fast_sqp_planner" type="fast_sqp_planner_node.py"
+        name="planner_rolling" output="screen">
+    <remap from="/planner/fast_sqp_planner/otwpnts" to="/planner/avoidance/otwpnts"/>
+    <rosparam command="load"
+              file="$(find fast_sqp_planner)/config/fast_sqp_planner.yaml"/>
+    <!-- FBGA params (overrides yaml when set) -->
+    <param name="fbga_enable"     value="$(arg fbga_enable)"/>
+    <param name="fbga_bin"        value="$(arg fbga_bin)"/>
+    <param name="fbga_gg_bin"     value="$(arg fbga_gg_bin)"/>
+    <param name="fbga_params_yml" value="$(arg fbga_params_yml)"/>
+    <param name="bridge_effect"   value="$(arg bridge_effect)"/>
+  </node>
+</launch>

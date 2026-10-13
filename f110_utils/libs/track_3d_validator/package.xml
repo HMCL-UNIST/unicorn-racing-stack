@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>track_3d_validator</name>
+  <version>0.0.0</version>
+  <description>3D track boundary validator (replaces GridFilter for 3D tracks)</description>
+  <maintainer email="hangyo@unist.ac.kr">HangyoCho</maintainer>
+  <license>Apache License 2.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>rospy</exec_depend>
+
+  <export>
+    <build_type>catkin</build_type>
+  </export>
+</package>

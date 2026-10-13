@@ -1,0 +1,32 @@
+# Braces on a new line
+BreakBeforeBraces: Allman
+
+# Stop breaking strings
+BreakStringLiterals: false
+
+# Indentation
+ColumnLimit: 100
+AlignConsecutiveAssignments:
+  Enabled: true
+  AlignCompound: true
+AlignAfterOpenBracket: BlockIndent
+SeparateDefinitionBlocks: Always
+BinPackArguments: false
+BinPackParameters: false
+ContinuationIndentWidth: 2
+AlignOperands: Align
+BreakBeforeBinaryOperators: NonAssignment
+AlwaysBreakTemplateDeclarations: Yes
+
+# Penalties
+PenaltyBreakAssignment: 10000
+PenaltyBreakBeforeFirstCallParameter: 0
+PenaltyBreakComment: 0
+PenaltyBreakFirstLessLess: 0
+PenaltyBreakOpenParenthesis: 0
+PenaltyBreakScopeResolution: 10000
+# PenaltyBreakString: 10000
+PenaltyBreakTemplateDeclaration: 0
+PenaltyExcessCharacter: 10
+PenaltyIndentedWhitespace: 100
+PenaltyReturnTypeOnItsOwnLine: 100

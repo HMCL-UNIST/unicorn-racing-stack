@@ -1,0 +1,19 @@
+{
+  "seed_radius": 0.3,
+  "presets": {
+    "ground": {
+      "normal_thresh": 0.8,
+      "z_tol": 0.06,
+      "z_band": 0.3
+    },
+    "wall": {
+      "normal_thresh": 0.5,
+      "z_tol": 0.3,
+      "z_band": 0.5
+    }
+  },
+  "ground_count": 267186,
+  "wall_count": 143043,
+  "other_count": 10587341,
+  "deleted_count": 0
+}

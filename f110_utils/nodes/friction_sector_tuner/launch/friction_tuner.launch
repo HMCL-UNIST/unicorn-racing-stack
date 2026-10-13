@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- friction slicing GUI only — standalone trigger.
+         Same pattern as 3d_safety_sector_tuner/launch/safety_tuner.launch.
+         User marks sector boundaries on global_waypoints.json (3D iqp
+         raceline), "Finish" dumps <map>/friction_scaling.yaml and
+         scripts/finish_sector.sh rebuilds the dyn cfg.
+
+         The dyn cfg server lives in a separate launch
+         (friction_setting.launch) so the slicing GUI and the live rqt
+         sliders can be toggled independently. -->
+    <arg name="map"     default="gazebo_wall_2" />
+    <arg name="map_dir" default="$(find stack_master)/maps/$(arg map)" />
+
+    <node pkg="friction_sector_tuner"
+          type="friction_sector_slicing.py"
+          name="friction_sector_node"
+          output="screen">
+        <param name="save_dir" value="$(arg map_dir)" />
+    </node>
+</launch>

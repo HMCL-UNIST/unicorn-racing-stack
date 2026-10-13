@@ -1,0 +1,20 @@
+# launch_control.yaml — startup values for simple_mux's launch profile (per-car).
+# Loaded by test_launch_control.launch into the /vesc/simple_mux node namespace,
+# so dynamic_reconfigure picks them up as the initial slider values.
+#
+# Format matches what the rqt_launch_control plugin's "Save YAML" button writes,
+# so the round-trip works: tune in rqt → Save YAML → drop here as new per-car default.
+
+launch_profile_mode: 1          # 0=CONSTANT, 1=CURVE
+launch_current_A:   15.0        # CONSTANT mode flat current [A]
+
+# CURVE-mode 4-phase exponential profile
+launch_I_back:      30.0        # phase 1 end / phase 2 start [A]
+launch_I_peak:      75.0        # phase 2/3 peak [A]
+launch_t_back:      0.05        # phase 1 end time [s]
+launch_t_rise_end:  0.30        # phase 2 end time (exp rise finished) [s]
+launch_tau:         0.08        # exp rise time constant (chassis pitch tau) [s]
+
+# Shared by both modes
+launch_t_total:     1.00        # total launch window [s]
+launch_safety_floor_margin: 0.1 # post-launch speed floor margin [m/s]

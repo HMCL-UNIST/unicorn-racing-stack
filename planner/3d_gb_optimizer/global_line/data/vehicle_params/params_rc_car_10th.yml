@@ -1,0 +1,43 @@
+---
+vehicle_params:
+  m: 4.38  # vehicle mass in kg (measured)
+  rho: 1.225  # air density in kg / m^3
+  C_D_A: 0.0222  # drag area coefficient (c*A) (from dragcoeff=0.0136 / (0.5*1.225))
+  C_Lf_A: 0.00163  # front lift area coefficient (from liftcoeff_front=0.001 / (0.5*1.225))
+  C_Lr_A: 0.00245  # rear lift area coefficient (from liftcoeff_rear=0.0015 / (0.5*1.225))
+  h: 0.055  # height of center of mass in m (from cog_z)
+  w: 0.33  # wheelbase in m (0.159 + 0.171)
+  a: 0.159  # longitudinal distance of the center of mass (front) in m
+  b: 0.171  # longitudinal distance of the center of mass (rear) in m
+  T: 0.281  # vehicle track in m (from track_width_front/rear)
+  epsilon: 0.5  # roll stiffness ratio (from k_roll)
+  gamma: 1  # braking ratio F_xf / F_xr (k_drive_front=0, RWD)
+  P_max: 267  # power in W (from power_max)
+  delta_max: 0.52  # maximum steering angle in rad
+  v_max: 12.0  # maximum velocity in m/s (from racecar_f110.ini)
+  total_width: 0.30  # total width in m
+  total_length: 0.535  # total length in m
+
+tire_params:
+  # based on SRX2_pacejka.yaml (front/rear 50:50 avg), D = 0.56 (carpet/indoor)
+  # Base: B_avg=12.4, C_avg=1.83, E_avg=0.185, D = 0.56
+  # Longitudinal
+  p_Cx_1: 1.83  # shape factor (avg of C_f=2.16, C_r=1.50)
+  p_Dx_1: 0.56  # max friction coefficient
+  p_Dx_2: -0.1  # load dependency factor (kept from racecar_f110.ini)
+  p_Ex_1: 0.185  # curvature factor (avg of E_f=0.37, E_r=~0.0)
+  p_Kx_1: 12.71  # max stiffness coefficient (= B_avg * C_avg * D = 12.4 * 1.83 * 0.56)
+  p_Kx_3: 0  # stiffness load dependency
+  lambda_mu_x: 1.0  # longitudinal scaling factor
+  ## Lateral
+  p_Cy_1: 1.83  # shape factor
+  p_Dy_1: 0.56  # max friction coefficient
+  p_Dy_2: -0.1  # load dependency factor
+  p_Ey_1: 0.185  # curvature factor
+  p_Ky_1: -12.71  # max stiffness coefficient (= -(B_avg * C_avg * D))
+  p_Ky_2: 1.0  # stiffness load dependency
+  lambda_mu_y: 1.0  # lateral scaling factor
+  N_0: 8.6  # nominal load per wheel in N (= f_z0)
+  N_max: 50  # maximum allowed wheel load
+  kappa_max: 1.5  # maximum longitudinal slip
+  lambda_max: 1.6  # maximum lateral slip

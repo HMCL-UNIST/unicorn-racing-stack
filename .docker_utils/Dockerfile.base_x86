@@ -1,0 +1,50 @@
+# 
+# Container Creation for the F110 race-stack at Center for Project Based Learning, ETH
+#
+
+# use ROS Noetic image 
+FROM ros:noetic-robot
+SHELL [ "/bin/bash", "-c" ]
+
+ADD ./.devcontainer/.install_utils /.install_utils
+
+# install ros packages
+ARG DEBIAN_FRONTEND=noninteractive
+# use HTTPS mirrors (port 80 blocked on this network)
+RUN sed -i 's|http://archive.ubuntu.com|https://archive.ubuntu.com|g; s|http://security.ubuntu.com|https://security.ubuntu.com|g' /etc/apt/sources.list
+RUN apt-get update && xargs apt-get install -y < /.install_utils/linux_req_car.txt 
+
+# install python packages
+RUN --mount=type=cache,target=/root/.cache/pip pip3 install -r /.install_utils/requirements.txt && \
+        pip3 install numpy casadi open3d pybind11
+
+
+# install catkin build tools
+RUN apt-get update && apt-get install -y curl gnupg2 lsb-release && \
+    curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | \
+    gpg --dearmor -o /usr/share/keyrings/ros-archive-keyring.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" \
+    > /etc/apt/sources.list.d/ros-latest.list && \
+    apt-get update && apt-get install -y python3-catkin-tools
+    
+# install build dependencies
+RUN . /.install_utils/build_req.sh
+
+# install livox driver & Livox-SDK2
+RUN . /.install_utils/dev_livox_setup.sh
+
+# -- GLIL dependencies ------------------------------------------------------
+RUN apt-get update && xargs apt-get install -y < /.install_utils/linux_req_glil.txt
+
+# CMake 3.28 (GTSAM requires newer cmake than system default)
+RUN apt-get install -y --no-install-recommends wget ca-certificates && \
+    wget -qO /tmp/cmake.tar.gz \
+      https://github.com/Kitware/CMake/releases/download/v3.28.6/cmake-3.28.6-linux-x86_64.tar.gz && \
+    tar -xzf /tmp/cmake.tar.gz -C /usr/local --strip-components=1 && \
+    rm /tmp/cmake.tar.gz
+
+# GLIL thirdparty superbuild (GTSAM, ROBIN, gtsam_points, KISS-Matcher)
+COPY state_estimation/GLIL_unicorn_racing/glim/thirdparty /glil_thirdparty_src
+RUN . /.install_utils/glil_thirdparty_build.sh && rm -rf /glil_thirdparty_src
+
+ENTRYPOINT [ "bash", "/.install_utils/ros_entrypoint.sh" ]
