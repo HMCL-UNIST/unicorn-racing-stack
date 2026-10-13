@@ -23,11 +23,10 @@ roslaunch stack_master 3d_base_system.launch map:=<map> racecar_version:=<car>
 `low_level.launch` (included) starts the VESC, the LiDAR, the IMU and the RC/joystick receiver; it can also be run alone.
 
 ## Head-to-head
-Perception, prediction, planners, state machine and controller:
+Prediction, planners, state machine and controller:
 ```bash
 roslaunch stack_master 3d_headtohead_fbga.launch
 ```
-- `ctrl_algo:=PP|MAP`: Pure Pursuit (default) or MAP; MAP needs a lookup table, selected with `LU_table:=<name>`.
 - `fbga_states`: states in which the state machine fills the speed of the local waypoints with FBGA. `3d_headtohead.launch` is the variant without FBGA.
 
 ## Tools
