@@ -84,7 +84,8 @@ See [INSTALLATION.md](./INSTALLATION.md), then [READYTORUN.md](./READYTORUN.md) 
 
 This project builds on the open-source race stack of [ForzaETH](https://github.com/ForzaETH/race_stack), from the installation setup to the overall autonomous racing architecture. We also use and thank:
 
-- [GLIM](https://github.com/koide3/glim) — LiDAR-inertial mapping, and its localization extension GLIL
-- [FBGA](./f110_utils/libs/FBGA/README.md) — forward-backward velocity profiles with generic acceleration constraints (Piazza et al.)
-- [global_racetrajectory_optimization](https://github.com/TUMFTM/global_racetrajectory_optimization)
+- [GLIM](https://github.com/koide3/glim) — LiDAR-inertial mapping and localization (Koide et al.)
+- [online_3D_racing_line_planning](https://github.com/TUMRT/online_3D_racing_line_planning) — 3D track model, GGV diagrams and time-optimal racing line on 3D tracks, the base of the 3D global planner
+- [FBGA](https://github.com/Mattiapzz/FBGA) — forward-backward velocity profiles with generic acceleration constraints (Piazza et al.)
+- [global_racetrajectory_optimization](https://github.com/TUMFTM/global_racetrajectory_optimization), [trajectory_planning_helpers](https://github.com/TUMFTM/trajectory_planning_helpers)
 - [Veddar VESC Interface](https://github.com/f1tenth/vesc)
