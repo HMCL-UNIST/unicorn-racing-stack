@@ -25,10 +25,10 @@ roslaunch stack_master 3d_base_system.launch map:=<map> racecar_version:=<car>
 ## Head-to-head
 Perception, prediction, planners, state machine and controller:
 ```bash
-roslaunch stack_master 3d_headtohead.launch        # or 3d_headtohead_fbga.launch
+roslaunch stack_master 3d_headtohead_fbga.launch
 ```
 - `ctrl_algo:=PP|MAP`: Pure Pursuit (default) or MAP; MAP needs a lookup table, selected with `LU_table:=<name>`.
-- `3d_headtohead_fbga.launch`: the state machine fills the speed of the local waypoints with FBGA in the states listed in `fbga_states`.
+- `fbga_states`: states in which the state machine fills the speed of the local waypoints with FBGA. `3d_headtohead.launch` is the variant without FBGA.
 
 ## Tools
 - `gg_tuner_node.py`: front end for GGV generation, racing line, sector tools and velocity optimization (see the main README).

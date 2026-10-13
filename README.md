@@ -60,14 +60,14 @@ roslaunch stack_master 3d_global_line.launch map:=<map> vehicle:=rc_car_10th sta
 **On the car**
 ```bash
 roslaunch stack_master 3d_base_system.launch map:=<map> racecar_version:=<car>
-roslaunch stack_master 3d_headtohead.launch     # or 3d_headtohead_fbga
+roslaunch stack_master 3d_headtohead_fbga.launch
 ```
 
 **In simulation** — `sim:=true` disables the hardware drivers and state estimation and takes odometry from the Gazebo simulation in [roboracer_gazebo](https://github.com/HangyoCho/roboracer_gazebo), which must be running (on the same or another machine sharing the ROS master):
 ```bash
 roslaunch roboracer_gazebo icra_racetrack.launch          # roboracer_gazebo workspace
 roslaunch stack_master 3d_base_system.launch sim:=true map:=<map>
-roslaunch stack_master 3d_headtohead.launch
+roslaunch stack_master 3d_headtohead_fbga.launch
 ```
 The map is prepared from the simulated world with the same pipeline as above.
 
